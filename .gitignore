@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+data/
+notebook/.ipynb_checkpoints/
+flask_app/static/uploads/*
+!flask_app/static/uploads/.gitkeep
