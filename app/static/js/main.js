@@ -38,9 +38,11 @@ const probBars      = document.getElementById('probBars');
 const errorCard     = document.getElementById('errorCard');
 const errorMsg      = document.getElementById('errorMsg');
 const resetBtn      = document.getElementById('resetBtn');
+const downloadBtn   = document.getElementById('downloadBtn');
 const errorResetBtn = document.getElementById('errorResetBtn');
 
 let selectedFile = null;
+let lastResult   = null;
 
 // ── File selection ────────────────────────────────────────────────────────────
 fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
@@ -136,6 +138,40 @@ async function analyzeImage() {
   }
 }
 
+// ── PDF download ──────────────────────────────────────────────────────────────
+downloadBtn.addEventListener('click', async () => {
+  if (!lastResult) return;
+  downloadBtn.disabled = true;
+  downloadBtn.textContent = 'Generating PDF...';
+
+  try {
+    const res = await fetch('/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lastResult),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.error || 'PDF generation failed.');
+      return;
+    }
+
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'brain_tumor_report.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    alert('Failed to generate report. Please try again.');
+  } finally {
+    downloadBtn.disabled = false;
+    downloadBtn.textContent = 'Download PDF Report';
+  }
+});
+
 // ── Confidence badge ──────────────────────────────────────────────────────────
 function renderConfBadge(confPct) {
   confBadge.classList.remove('hidden', 'high', 'medium', 'low');
@@ -157,6 +193,7 @@ function renderConfBadge(confPct) {
 
 // ── Render result ─────────────────────────────────────────────────────────────
 function renderResult(data) {
+  lastResult = data;
   const cls    = data.predicted_class;
   const conf   = (data.confidence * 100).toFixed(1);
   const color  = CLASS_COLORS[cls] || '#6c63ff';

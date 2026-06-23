@@ -4,12 +4,13 @@ import torch
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, File, UploadFile, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from PIL import Image
 
 from predictor import TumorPredictor
+from report import generate_report_pdf
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR    = os.path.dirname(__file__)
@@ -71,6 +72,8 @@ async def predict(request: Request, file: UploadFile = File(...)):
         result = predictor.predict(image, save_dir=UPLOAD_DIR, base_name=base_name)
 
         base_url = str(request.base_url).rstrip("/")
+        result["base_name"]   = base_name
+        result["orig_ext"]    = ext
         result["image_url"]   = f"{base_url}/static/uploads/{filename}"
         result["heatmap_url"] = f"{base_url}/static/uploads/{result.pop('heatmap_name')}"
         result["overlay_url"] = f"{base_url}/static/uploads/{result.pop('overlay_name')}"
@@ -79,6 +82,26 @@ async def predict(request: Request, file: UploadFile = File(...)):
 
     except Exception as e:
         return JSONResponse({"error": f"Prediction failed: {str(e)}"}, status_code=500)
+
+
+@app.post("/report")
+async def download_report(request: Request):
+    data      = await request.json()
+    base_name = data.get("base_name", "")
+    orig_ext  = data.get("orig_ext", "")
+
+    orig_path    = os.path.join(UPLOAD_DIR, f"{base_name}.{orig_ext}")
+    overlay_path = os.path.join(UPLOAD_DIR, f"{base_name}_overlay.png")
+
+    try:
+        pdf_bytes = generate_report_pdf(data, orig_path, overlay_path)
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": 'attachment; filename="brain_tumor_report.pdf"'},
+        )
+    except Exception as e:
+        return JSONResponse({"error": f"PDF generation failed: {str(e)}"}, status_code=500)
 
 
 @app.get("/health")
