@@ -1,72 +1,115 @@
 # Brain Tumor Detection
 
-AI-powered MRI brain tumor classification using Transfer Learning (EfficientNet-B0) and Flask.
+AI-powered MRI brain tumor classification built with PyTorch transfer learning (EfficientNet-B0) and a FastAPI web application. Upload an MRI scan and get an instant prediction with Grad-CAM heatmap visualization and a confidence warning badge.
 
-## Classes
-- Glioma
-- Meningioma
-- Pituitary Tumor
-- No Tumor
+**Live demo:** https://brain-tumor-detection-umba.onrender.com
+
+---
+
+## Features
+
+- 4-class classification: Glioma, Meningioma, Pituitary Tumor, No Tumor
+- Grad-CAM heatmap showing which regions influenced the prediction
+- Confidence warning badge (High / Moderate / Low) with clinical guidance
+- Probability breakdown bar chart for all classes
+- Drag-and-drop image upload
 
 ## Tech Stack
-- **Model:** EfficientNet-B0 (PyTorch, Transfer Learning)
-- **Web App:** Flask
-- **Dataset:** [Brain Tumor Classification MRI](https://www.kaggle.com/datasets/sartajbhuvaji/brain-tumor-classification-mri)
+
+| Layer | Technology |
+|---|---|
+| Model | EfficientNet-B0 (PyTorch, pretrained ImageNet) |
+| Explainability | Grad-CAM (custom implementation, no external lib) |
+| Web App | FastAPI + Jinja2 + Uvicorn |
+| Dataset | [Brain Tumor Classification MRI — Kaggle](https://www.kaggle.com/datasets/sartajbhuvaji/brain-tumor-classification-mri) |
+| Deployment | Render.com |
 
 ## Project Structure
+
 ```
 Brain Tumor Detection/
-├── notebook/
-│   └── brain_tumor_detection.ipynb   # Training pipeline
-├── flask_app/
-│   ├── app.py                         # Flask server
-│   ├── model/                         # Saved model (.pth)
-│   ├── static/                        # CSS & JS
-│   ├── templates/                     # HTML
-│   └── utils/predictor.py             # Inference
-├── requirements.txt                   # All dependencies
+├── app/
+│   ├── main.py              # FastAPI routes and startup
+│   ├── predictor.py         # EfficientNet inference + Grad-CAM
+│   ├── static/
+│   │   ├── css/style.css
+│   │   ├── js/main.js
+│   │   └── uploads/         # Saved prediction images (gitignored)
+│   └── templates/
+│       └── index.html
+├── ml_model/
+│   ├── brain_tumor_efficientnet.pth   # Trained model weights
+│   └── brain_tumor_detection.ipynb   # Full training notebook
+├── data/                              # Dataset (gitignored)
+├── requirements.txt                   # Dev dependencies
 ├── requirements-deploy.txt            # Production dependencies
+├── Procfile                           # Render start command
 └── render.yaml                        # Render deployment config
 ```
 
-## Setup
+## Local Setup
 
-### 1. Clone & install
+### 1. Clone and install
+
 ```bash
-git clone https://github.com/ayanchyaziz123/rahman_brain-tumor-detection.git
-cd rahman_brain-tumor-detection
+git clone https://github.com/ayanchyaziz123/brain-tumor-detection.git
+cd brain-tumor-detection
 python -m venv venv
-source venv/bin/activate
+source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Download dataset
-Download from Kaggle and place as:
+### 2. Download the dataset
+
+Download from [Kaggle](https://www.kaggle.com/datasets/sartajbhuvaji/brain-tumor-classification-mri) and place it as:
+
 ```
 data/
-  Training/  glioma/  meningioma/  notumor/  pituitary/
-  Testing/   glioma/  meningioma/  notumor/  pituitary/
+  Training/
+    glioma/  meningioma/  notumor/  pituitary/
+  Testing/
+    glioma/  meningioma/  notumor/  pituitary/
 ```
 
-### 3. Train the model
+### 3. Train the model (optional — weights included)
+
+Open `ml_model/brain_tumor_detection.ipynb` in Jupyter and run all cells. The trained weights save to `ml_model/brain_tumor_efficientnet.pth`.
+
 ```bash
-cd notebook
-jupyter notebook brain_tumor_detection.ipynb
+jupyter notebook ml_model/brain_tumor_detection.ipynb
 ```
-Run all cells. Model saves to `flask_app/model/brain_tumor_efficientnet.pth`.
 
 ### 4. Run the app
+
 ```bash
-cd flask_app
-python app.py
+uvicorn app.main:app --reload
 ```
-Open `http://localhost:5000`
+
+Open `http://localhost:8000`
 
 ## Model Architecture
-- **Backbone:** EfficientNet-B0 pretrained on ImageNet
-- **Head:** Dropout → Linear(1280, 512) → SiLU → BN → Dropout → Linear(512, 4)
-- **Strategy:** Freeze backbone → train head → unfreeze top layers
-- **Augmentation:** Random flip, rotation, color jitter, random erasing
+
+- **Backbone:** EfficientNet-B0 pretrained on ImageNet (backbone frozen during initial training)
+- **Head:** Dropout(0.4) → Linear(1280, 512) → SiLU → BatchNorm → Dropout(0.2) → Linear(512, 4)
+- **Loss:** CrossEntropyLoss with label smoothing (0.1)
+- **Optimizer:** AdamW with CosineAnnealingLR
+- **Sampler:** WeightedRandomSampler to handle class imbalance
+- **Augmentation:** Random crop, flip, rotation, color jitter, random erasing
+
+## Confidence Badge
+
+| Badge | Confidence | Guidance |
+|---|---|---|
+| HIGH CONFIDENCE | 85%+ | Result is reliable |
+| MODERATE CONFIDENCE | 60–84% | Consider reviewing with a specialist |
+| LOW CONFIDENCE | Below 60% | Please consult a radiologist |
+
+> This tool is for educational purposes only and is not a substitute for professional medical diagnosis.
 
 ## Deployment
-Deployed on Render. See `render.yaml` for configuration.
+
+Deployed on Render free tier. Cold starts may take 20–30 seconds after inactivity. The frontend handles this with a 90-second timeout and a helpful loading message.
+
+## Author
+
+Built by **Rahman** — PyTorch · EfficientNet-B0 · FastAPI
