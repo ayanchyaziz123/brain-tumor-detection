@@ -4,11 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Brain Tumor Detection by Rahman | AI-Powered MRI Analysis</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
 
-  <!-- Header -->
   <header class="header">
     <div class="header-inner">
       <div class="logo">
@@ -25,10 +24,9 @@
     </div>
   </header>
 
-  <!-- Main -->
   <main class="main">
 
-    <!-- Upload card -->
+    <!-- Upload -->
     <section class="card upload-card">
       <h2 class="section-title">Upload MRI Scan</h2>
       <p class="section-sub">Supports JPG, PNG, JPEG &bull; Max 16 MB</p>
@@ -43,7 +41,6 @@
         <p class="drop-hint">JPEG &bull; PNG &bull; BMP &bull; TIFF</p>
       </div>
 
-      <!-- Preview -->
       <div class="preview-wrap hidden" id="previewWrap">
         <img id="previewImg" src="" alt="MRI Preview" class="preview-img" />
         <button class="btn btn-sm btn-ghost" id="clearBtn">X Clear</button>
@@ -55,7 +52,7 @@
       </button>
     </section>
 
-    <!-- Result card -->
+    <!-- Result -->
     <section class="card result-card hidden" id="resultCard">
       <h2 class="section-title">Analysis Result</h2>
 
@@ -68,13 +65,11 @@
         </div>
       </div>
 
-      <!-- Confidence bars -->
       <div class="prob-section">
         <h4 class="prob-title">Probability Breakdown</h4>
         <div id="probBars"></div>
       </div>
 
-      <!-- Images: Original / Heatmap / Overlay -->
       <div class="gradcam-section">
         <h4 class="prob-title">Grad-CAM Visualization</h4>
         <p class="gradcam-desc">Red/yellow regions show where the model focused to make its decision.</p>
@@ -94,7 +89,6 @@
         </div>
       </div>
 
-      <!-- Disclaimer -->
       <div class="disclaimer">
         <strong>Medical Disclaimer:</strong> This AI tool is for research and educational purposes only.
         It is not a substitute for professional medical diagnosis. Always consult a qualified physician.
@@ -103,7 +97,7 @@
       <button class="btn btn-outline btn-full" id="resetBtn">Analyze Another Scan</button>
     </section>
 
-    <!-- Error card -->
+    <!-- Error -->
     <section class="card error-card hidden" id="errorCard">
       <h3 class="error-title">Analysis Failed</h3>
       <p class="error-msg" id="errorMsg"></p>
@@ -136,9 +130,9 @@
   </main>
 
   <footer class="footer">
-    <p>Built by <strong>Rahman</strong> &nbsp;&bull;&nbsp; PyTorch &bull; EfficientNet-B0 &bull; Flask</p>
+    <p>Built by <strong>Rahman</strong> &nbsp;&bull;&nbsp; PyTorch &bull; EfficientNet-B0 &bull; FastAPI</p>
   </footer>
 
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="/static/js/main.js"></script>
 </body>
 </html>

@@ -1,1 +1,1 @@
-web: gunicorn --chdir flask_app -w 2 -b 0.0.0.0:$PORT app:app
+web: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 2
