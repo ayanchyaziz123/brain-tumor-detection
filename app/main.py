@@ -1,7 +1,12 @@
 import os
+import sys
 import uuid
 import torch
 from contextlib import asynccontextmanager
+
+# Ensure app/ is on sys.path so sibling modules (predictor, report) are importable
+# regardless of whether uvicorn is launched from the project root or app/ directory.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
