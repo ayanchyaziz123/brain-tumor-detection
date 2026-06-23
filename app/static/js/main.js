@@ -31,6 +31,9 @@ const resultConf    = document.getElementById('resultConf');
 const resultImg     = document.getElementById('resultImg');
 const heatmapImg    = document.getElementById('heatmapImg');
 const overlayImg    = document.getElementById('overlayImg');
+const confBadge     = document.getElementById('confBadge');
+const confBadgeIcon = document.getElementById('confBadgeIcon');
+const confBadgeText = document.getElementById('confBadgeText');
 const probBars      = document.getElementById('probBars');
 const errorCard     = document.getElementById('errorCard');
 const errorMsg      = document.getElementById('errorMsg');
@@ -133,6 +136,25 @@ async function analyzeImage() {
   }
 }
 
+// ── Confidence badge ──────────────────────────────────────────────────────────
+function renderConfBadge(confPct) {
+  confBadge.classList.remove('hidden', 'high', 'medium', 'low');
+
+  if (confPct >= 85) {
+    confBadge.classList.add('high');
+    confBadgeIcon.textContent = 'HIGH CONFIDENCE';
+    confBadgeText.textContent = `${confPct.toFixed(1)}% — Result is reliable.`;
+  } else if (confPct >= 60) {
+    confBadge.classList.add('medium');
+    confBadgeIcon.textContent = 'MODERATE CONFIDENCE';
+    confBadgeText.textContent = `${confPct.toFixed(1)}% — Consider reviewing with a specialist.`;
+  } else {
+    confBadge.classList.add('low');
+    confBadgeIcon.textContent = 'LOW CONFIDENCE';
+    confBadgeText.textContent = `${confPct.toFixed(1)}% — Result is uncertain. Please consult a radiologist.`;
+  }
+}
+
 // ── Render result ─────────────────────────────────────────────────────────────
 function renderResult(data) {
   const cls    = data.predicted_class;
@@ -151,6 +173,9 @@ function renderResult(data) {
   resultImg.src    = data.image_url;
   heatmapImg.src   = data.heatmap_url;
   overlayImg.src   = data.overlay_url;
+
+  // Confidence warning badge
+  renderConfBadge(parseFloat(conf));
 
   // Probability bars
   probBars.innerHTML = '';
