@@ -74,9 +74,24 @@
         <div id="probBars"></div>
       </div>
 
-      <!-- Result image -->
-      <div class="result-img-wrap">
-        <img id="resultImg" src="" alt="Analyzed MRI" class="result-img" />
+      <!-- Images: Original / Heatmap / Overlay -->
+      <div class="gradcam-section">
+        <h4 class="prob-title">Grad-CAM Visualization</h4>
+        <p class="gradcam-desc">Red/yellow regions show where the model focused to make its decision.</p>
+        <div class="gradcam-grid">
+          <div class="gradcam-item">
+            <img id="resultImg" src="" alt="Original MRI" />
+            <span>Original MRI</span>
+          </div>
+          <div class="gradcam-item">
+            <img id="heatmapImg" src="" alt="Grad-CAM Heatmap" />
+            <span>Grad-CAM Heatmap</span>
+          </div>
+          <div class="gradcam-item">
+            <img id="overlayImg" src="" alt="Overlay" />
+            <span>Overlay</span>
+          </div>
+        </div>
       </div>
 
       <!-- Disclaimer -->

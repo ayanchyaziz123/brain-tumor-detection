@@ -2,12 +2,10 @@ import os
 import uuid
 import torch
 from flask import Flask, render_template, request, jsonify, url_for
-from werkzeug.utils import secure_filename
 from PIL import Image
 
 from utils.predictor import TumorPredictor
 
-# Limit CPU threads on Render free tier (1 vCPU)
 torch.set_num_threads(1)
 
 app = Flask(__name__)
@@ -19,7 +17,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'tiff'}
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Load model at startup so the first prediction isn't slow
 try:
     _predictor = TumorPredictor.get_instance(app.config['MODEL_PATH'])
     print('Model loaded at startup ✓')
@@ -50,17 +47,26 @@ def predict():
         return jsonify({'error': 'No file selected'}), 400
 
     if not allowed_file(file.filename):
-        return jsonify({'error': 'Invalid file type. Please upload a JPG, PNG, or similar image.'}), 400
+        return jsonify({'error': 'Invalid file type. Please upload a JPG or PNG image.'}), 400
 
     try:
-        ext = file.filename.rsplit('.', 1)[1].lower()
-        filename = f"{uuid.uuid4().hex}.{ext}"
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        ext       = file.filename.rsplit('.', 1)[1].lower()
+        base_name = uuid.uuid4().hex
+        filename  = f'{base_name}.{ext}'
+        filepath  = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
 
-        image = Image.open(filepath)
-        result = _predictor.predict(image)
-        result['image_url'] = url_for('static', filename=f'uploads/{filename}')
+        image  = Image.open(filepath)
+        result = _predictor.predict_with_gradcam(
+            image,
+            save_dir=app.config['UPLOAD_FOLDER'],
+            base_name=base_name
+        )
+
+        result['image_url']   = url_for('static', filename=f'uploads/{filename}')
+        result['heatmap_url'] = url_for('static', filename=f"uploads/{result.pop('heatmap_name')}")
+        result['overlay_url'] = url_for('static', filename=f"uploads/{result.pop('overlay_name')}")
+
         return jsonify(result)
 
     except Exception as e:
@@ -69,8 +75,7 @@ def predict():
 
 @app.route('/health')
 def health():
-    status = 'ok' if _predictor is not None else 'model_missing'
-    return jsonify({'status': status})
+    return jsonify({'status': 'ok' if _predictor else 'model_missing'})
 
 
 if __name__ == '__main__':

@@ -29,6 +29,8 @@ const resultBadge   = document.getElementById('resultBadge');
 const resultClass   = document.getElementById('resultClass');
 const resultConf    = document.getElementById('resultConf');
 const resultImg     = document.getElementById('resultImg');
+const heatmapImg    = document.getElementById('heatmapImg');
+const overlayImg    = document.getElementById('overlayImg');
 const probBars      = document.getElementById('probBars');
 const errorCard     = document.getElementById('errorCard');
 const errorMsg      = document.getElementById('errorMsg');
@@ -146,7 +148,9 @@ function renderResult(data) {
   resultBadge.style.border     = `2px solid ${color}44`;
   resultClass.textContent = cls;
   resultConf.textContent  = `Confidence: ${conf}%`;
-  resultImg.src           = data.image_url;
+  resultImg.src    = data.image_url;
+  heatmapImg.src   = data.heatmap_url;
+  overlayImg.src   = data.overlay_url;
 
   // Probability bars
   probBars.innerHTML = '';
