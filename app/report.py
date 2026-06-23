@@ -155,4 +155,4 @@ def generate_report_pdf(data: dict, orig_path: str | None, overlay_path: str | N
         'consult a qualified radiologist or physician before making any medical decisions.',
         border=1, fill=True)
 
-    return pdf.output()
+    return bytes(pdf.output())
