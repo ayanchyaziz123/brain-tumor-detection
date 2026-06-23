@@ -13,7 +13,7 @@ from predictor import TumorPredictor
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 BASE_DIR    = os.path.dirname(__file__)
-MODEL_PATH  = os.path.join(BASE_DIR, "..", "model", "brain_tumor_efficientnet.pth")
+MODEL_PATH  = os.path.join(BASE_DIR, "..", "ml_model", "brain_tumor_efficientnet.pth")
 UPLOAD_DIR  = os.path.join(BASE_DIR, "static", "uploads")
 ALLOWED_EXT = {"png", "jpg", "jpeg", "bmp", "tiff", "gif"}
 
